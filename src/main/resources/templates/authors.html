@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html th:replace="layout/masterLayout :: layout(~{::main})" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+<main role="main">
+    <div class="container my-5">
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Authors</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Name</th>
+                                    <th>DateOfBirth</th>
+                                    <th>Email</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="au : ${authors}">
+                                <td th:text="${au.id}"></td>
+                                <td th:text="${au.name}"></td>
+                                <td th:text="${au.dateOfBirth}"></td>
+                                <td th:text="${au.email}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <a th:href="@{/author-form}" class="btn btn-primary my-3">New Author</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

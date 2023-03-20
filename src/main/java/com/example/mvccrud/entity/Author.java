@@ -32,9 +32,14 @@ public class Author {
     @Email(message = "Invalid Email Format!")
     private String email;
 
-    @OneToMany(mappedBy = "author")
+    @OneToMany(mappedBy = "author",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Book> books=
             new ArrayList<>();
+
+    public void removeBook(Book book){
+        book.setAuthor(null);
+        books.remove(book);
+    }
 
     public void addBook(Book book){
         book.setAuthor(this);

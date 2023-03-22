@@ -1,5 +1,6 @@
 package com.example.mvccrud.controller;
 
+import com.example.mvccrud.ds.Cart;
 import com.example.mvccrud.entity.Author;
 import com.example.mvccrud.entity.Book;
 import com.example.mvccrud.service.BookService;
@@ -9,10 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -24,9 +22,31 @@ public class BooksController {
 
     private final BookService bookService;
 
-    public BooksController(BookService bookService) {
+    private final Cart cart;
+
+    public BooksController(BookService bookService, Cart cart) {
         this.bookService = bookService;
+        this.cart = cart;
     }
+
+    @GetMapping("/cart/add-cart")
+    public String addToCart(@RequestParam("id")int id){
+        bookService.addToCart(id);
+        return "redirect:/book/details?id="+id;
+    }
+
+    @ModelAttribute("cartSize")
+    public int cartSize(){
+        return bookService.cartSize();
+    }
+
+    @GetMapping("/book/details")
+    public String detailsBook(@RequestParam("id")int id,Model model){
+        model.addAttribute("book"
+                ,bookService.findBookById(id));
+        return "details-book";
+    }
+
 
    @GetMapping("/book/update")
     public String updateForm(@RequestParam("id")int id,Model model){
@@ -36,12 +56,17 @@ public class BooksController {
         model.addAttribute("authors",bookService.listAuthors());
         return "book-update";
     }
+    String imagUrl;
+    Author author;
+    int uiUpdateId;
     @GetMapping("/book/ui-update")
     public String uIUpdate(@RequestParam("id")int id,Model model){
 
         Book updateBook=bookService.findBookById(id);
+        imagUrl=updateBook.getImgUrl();
+        this.author=updateBook.getAuthor();
+        this.uiUpdateId=updateBook.getId();
         List<Book> bookList=bookService.listBooks().stream()
-               // .filter(b -> b.equals(updateBook))
                 .map(b -> {
                     if(b.equals(updateBook)) {
                         b.setRender(true);
@@ -51,8 +76,26 @@ public class BooksController {
                 .collect(Collectors.toList());
         System.out.println();
         model.addAttribute("books",bookList);
+        model.addAttribute("updateBook",updateBook);
         return "books";
     }
+    @PostMapping("/ui/update/book")
+    public String updateBookAgain(Book updateBook
+            ,BindingResult result){
+        if(result.hasErrors()){
+            return "redirect:/book/ui-update";
+        }
+        updateBook.setAuthor(author);
+        updateBook.setImgUrl(imagUrl);
+        updateBook.setId(uiUpdateId);
+
+        updateBook.setRender(false);
+
+        bookService.updateAgain(updateBook);
+
+        return "redirect:/list-books";
+    }
+
     int bookId;
 
     @PostMapping("/book/update")
@@ -83,7 +126,7 @@ public class BooksController {
 
     @GetMapping({"/","/home"})
     public ModelAndView index(){
-       return new ModelAndView("books",
+       return new ModelAndView("home",
                "books",bookService.listBooks());
     }
     @GetMapping("/author-form")

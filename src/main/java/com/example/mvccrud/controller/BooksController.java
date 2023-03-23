@@ -1,6 +1,7 @@
 package com.example.mvccrud.controller;
 
 import com.example.mvccrud.ds.Cart;
+import com.example.mvccrud.ds.CartItem;
 import com.example.mvccrud.entity.Author;
 import com.example.mvccrud.entity.Book;
 import com.example.mvccrud.service.BookService;
@@ -15,18 +16,42 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
 public class BooksController {
 
     private final BookService bookService;
+    @GetMapping("/check-out-v1")
+    public String checkOutV1(Model model){
+        Set<CartItem> cartItems=bookService.getCartItems()
+                .stream().map(
+                        item -> {
+                            item.setRender(true);
+                            return item;
+                        }
+                )
+                .collect(Collectors.toSet());
+        model.addAttribute("cartItems",cartItems);
+        return "cart-view";
+    }
 
-    private final Cart cart;
 
-    public BooksController(BookService bookService, Cart cart) {
+    @GetMapping("/view-cart")
+    public String viewCart(Model model){
+        model.addAttribute("cartItems"
+                ,bookService.getCartItems());
+        return "cart-view";
+    }
+    @GetMapping("/cart/remove")
+    public String removeFromCart(@RequestParam("id")int id){
+        bookService.removeFromCart(id);
+        return "redirect:/view-cart";
+    }
+
+    public BooksController(BookService bookService) {
         this.bookService = bookService;
-        this.cart = cart;
     }
 
     @GetMapping("/cart/add-cart")
@@ -35,9 +60,25 @@ public class BooksController {
         return "redirect:/book/details?id="+id;
     }
 
+
+
     @ModelAttribute("cartSize")
     public int cartSize(){
         return bookService.cartSize();
+    }
+    @GetMapping("/clear-cart")
+    public String clearCart(){
+        bookService.clearCart();
+        return "redirect:/view-cart";
+    }
+
+    @ModelAttribute("totalPrice")
+    public double totalPrice(){
+       return bookService.getCartItems()
+                .stream()
+                .map(item -> item.getPrice() * item.getQuantity())
+                .mapToDouble(i -> i)
+                .sum();
     }
 
     @GetMapping("/book/details")

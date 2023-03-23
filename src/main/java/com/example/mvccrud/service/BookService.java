@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class BookService {
@@ -20,9 +22,21 @@ public class BookService {
     private final BookDao bookDao;
     private final Cart cart;
 
+    public void clearCart(){
+        cart.clearCart();
+    }
+
     public Book findBookById(int id){
         return bookDao.findById(id)
                 .orElseThrow(EntityNotFoundException::new);
+    }
+    public Set<CartItem> removeFromCart(int id){
+        Set<CartItem> cartItems=getCartItems()
+                .stream()
+                .filter(i -> i.getId()!=id)
+                .collect(Collectors.toSet());
+                cart.setCartItems(cartItems);
+                return cartItems;
     }
 
     public BookService(AuthorDao authorDao, BookDao bookDao, Cart cart) {
@@ -55,6 +69,9 @@ public class BookService {
             throw new EntityNotFoundException(bookId + " Not Found!");
         }*/
     }
+    public Set<CartItem> getCartItems(){
+        return cart.getCartItems();
+    }
     @Transactional
     public void saveBook(Book book) {
         Author author=
@@ -62,6 +79,7 @@ public class BookService {
         author.addBook(book);
         bookDao.save(book);
     }
+
     @Transactional
     public void update(Book book) {
         Book existBook=findBookById(book.getId());
@@ -80,6 +98,8 @@ public class BookService {
     public int cartSize(){
         return cart.cartSize();
     }
+
+
 
     public void addToCart(int id) {
         Book book=findBookById(id);

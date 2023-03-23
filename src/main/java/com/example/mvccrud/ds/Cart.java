@@ -13,6 +13,14 @@ public class Cart {
     private Set<CartItem> cartItems=
             new HashSet<>();
 
+    public Set<CartItem> getCartItems(){
+        return cartItems;
+    }
+
+    public void setCartItems(Set<CartItem> cartItems) {
+        this.cartItems = cartItems;
+    }
+
     public void addToCart(CartItem cartItem){
         this.cartItems.add(cartItem);
     }

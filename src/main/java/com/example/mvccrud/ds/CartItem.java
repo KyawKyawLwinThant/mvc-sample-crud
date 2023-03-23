@@ -22,6 +22,8 @@ public class CartItem {
     private double price;
     private int quantity;
 
+    public CartItem(){}
+
     private boolean render;
     private LinkedList<Integer> quantityLinkedList=
             new LinkedList<>();

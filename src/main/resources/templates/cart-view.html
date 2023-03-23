@@ -4,70 +4,72 @@
 
 <body>
 <main role="main">
-  <div class="container my-5">
-    <div class="row">
-      <div class="col">
-        <div class="card-header">
-          <h3>Cart View</h3>
-        </div>
-        <div class="card-body">
-          <div th:if="${!cartItems.isEmpty()}">
-            <table class="table table-stripe">
-              <thead>
-              <tr>
-                <th>Id</th>
-                <th>Title</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Action</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr th:each="item :${cartItems}">
-                <td th:text="${item.id}"></td>
-                <td th:text="${item.title}"></td>
-                <td th:text="${item.price}"></td>
-                <td th:if="${!item.render}" th:text="${item.quantity}"></td>
-                <td th:if="${item.render}">
-                  <input type="number" class="form-control">
-                </td>
-                <td><a class="btn btn-outline-danger"
-                       th:href="@{'/cart/remove?id='+${item.id}}">Delete</a></td>
-              </tr>
-              </tbody>
-            </table>
-            <!--
-            <span th:utext="${#decimalFormat('0.00', ${myDecimal})}"></span>
-            -->
-            <h4 class="text-muted text-right">Total :: $<span th:utext="${#numbers.formatDecimal(totalPrice,0,2)}"></span></h4>
-          </div>
-          <div th:if="${cartItems.isEmpty()}">
-            <div class="alert alert-success" role="alert">
-              <p>No Cart Item!</p>
+    <div class="container my-5">
+        <div class="row">
+            <div class="col">
+                <div class="card-header">
+                    <h3>Cart View</h3>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/check-out-v2}" th:object="${cartItem}" method="post">
+                        <div th:if="${!cartItems.isEmpty()}">
+
+                            <table class="table table-stripe">
+                                <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Title</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="item :${cartItems}">
+                                    <td th:text="${item.id}"></td>
+                                    <td th:text="${item.title}"></td>
+                                    <td th:text="${item.price}"></td>
+                                    <div th:if="${!item.render}"><td  th:text="${item.quantity}"></td>
+                                    </div>
+                                    <td th:if="${item.render}">
+                                        <input type="number" min="1" th:field="*{quantityLinkedList}"
+                                               class="form-control">
+                                    </td>
+                                    <td><a class="btn btn-outline-danger"
+                                           th:href="@{'/cart/remove?id='+${item.id}}">Delete</a></td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                            <!--
+                            <span th:utext="${#decimalFormat('0.00', ${myDecimal})}"></span>
+                            -->
+                            <h4 class="text-muted text-right">Total :: $<span
+                                    th:utext="${#numbers.formatDecimal(totalPrice,0,2)}"></span></h4>
+                        </div>
+                        <div th:if="${cartItems.isEmpty()}">
+                            <div class="alert alert-success" role="alert">
+                                <p>No Cart Item!</p>
+                            </div>
+                        </div>
+
+                        <hr class="my-3">
+                        <div>
+                            <a th:href="@{/clear-cart}" class="btn btn-outline-secondary">Clear Cart</a>
+                            <a th:href="@{/}" class="btn btn-outline-success">Continue Shopping</a>
+                            <a th:if="${!changeButton}" th:href="@{/check-out-v1}"
+                               class="btn btn-outline-info">CheckOut</a>
+                            <input type="submit" th:if="${changeButton}"
+                                   class="btn btn-outline-primary" value="Save"></input>
+
+                        </div>
+                    </form>
+
+
+                </div>
             </div>
-          </div>
-
-          <hr class="my-3">
-          <div>
-            <a th:href="@{/clear-cart}" class="btn btn-outline-secondary">Clear Cart</a>
-            <a th:href="@{/}" class="btn btn-outline-success">Continue Shopping</a>
-            <a th:href="@{/check-out-v1}" class="btn btn-outline-info">CheckOut</a>
-          </div>
-
-
-
-
-
-
-
-
-
-
-
         </div>
-      </div>
     </div>
-  </div>
 </main>
 </body>
 </html>
